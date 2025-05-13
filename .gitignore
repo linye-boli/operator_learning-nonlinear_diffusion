@@ -1,22 +1,10 @@
 # Ignore large dataset files
 dataset/
-result/
-# dataset/nd/heat-1T-zsquares_r129.mat 
-# dataset/nd/heat-1T-zsquares-t1_r129.mat 
-# dataset/nd/heat-2T-zsquares_r257.mat 
-# dataset/nd/heat-2T-zsquares-t1_r257.mat 
-# dataset/nd/heat-2T-zsquares-t1-bmax_r257.mat 
-# dataset/nd_seq/0.2/
-# dataset/nd_seq/0.4/
-# dataset/nd_seq/0.6/
-# dataset/nd_seq/0.8/
-# dataset/nd_seq/1.0/
-# dataset/nd_seq/1.2/
-# dataset/nd_seq/1.4/
-# dataset/nd_seq/1.6/
-# dataset/nd_seq/1.8/
 
 # Ignore all exps
-# result/
-# ./results/exps/
-# ./results/seq_exps/
+result/exps/
+result/seq_exps/
+
+# Ignore cache files
+result/__pycache__/ 
+src/__pycache__/

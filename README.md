@@ -5,7 +5,35 @@ operator learning method to solve nonlinear diffusion problems
 
 This repository contains scripts to reproduce the results presented in the paper. Below are the instructions for running the experiments and processing the results.
 
-# Scripts and Corresponding Results
+# Project Structure
+```
+operator_learning-nonlinear_diffusion/
+├── dataset/
+|   ├── nd/
+|   └── nd_seq/
+├── result/
+|   ├── exps/
+|   ├── seq_exps/
+|   ├── figs/
+|   └── result_process.py
+├── src/
+│   ├── train.py
+│   ├── nets.py
+│   ├── utils.sh
+│   ├── nlayer_exps.sh
+│   ├── ntrain_exps.sh
+│   ├── modes_exps.sh
+│   ├── width_exps.sh
+│   ├── superres_exps.sh
+│   └── seq_exps.sh
+└── README.md
+```
+
+# Dataset and Results
+
+Download the dataset and results from link 
+
+# Scripts
 
 The following scripts are provided, each corresponding to specific tables or figures in the paper:
 

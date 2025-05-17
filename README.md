@@ -39,7 +39,7 @@ $$
 
 其中 $\Omega = [0,1]\times[0,1]$ ；辐射扩散系数 $D_L, K_L$ 同样选用限流形式，即 $D_L = \frac{1}{3\sigma_{\alpha}+\frac{|\nabla E|}{E}}, \sigma_{\alpha} = \frac{z^3}{E^{3/4}}, K_L = \frac{T^4}{T^{3/2}z+T^{5/2}|\nabla T|}$ 。
 
-对于上述单温、双温问题，电离度函数 $z$ 采用双方形，即当 $\frac{3}{16}<x<\frac{7}{16}, \frac{9}{16}<y<\frac{13}{16}$ 或 $\frac{9}{16}<x<\frac{13}{16}, \frac{3}{16}<y<\frac{7}{16}$ 时， $z=10$ ；其他时候 $z=1$ 。
+对于上述单温、双温问题，电离度函数 $Z$ 采用双方形，即当 $\frac{3}{16}<x<\frac{7}{16}, \frac{9}{16}<y<\frac{13}{16}$ 或 $\frac{9}{16}<x<\frac{13}{16}, \frac{3}{16}<y<\frac{7}{16}$ 时， $Z=10$ ；其他时候 $Z=1$ 。
 
 初边值条件采用常数初值+线性边值，即 $\beta (x,y,t) = \max$ { $20t, 10$ }, $g(x,y,t) = 0.01$ 。
 
@@ -50,21 +50,26 @@ $$
 |                    | Tasks                          |
 |--------------------|--------------------------------|
 | single-temperature | ① $Z \rightarrow E$            |
-|                    |  $Z \times t_1 \rightarrow E$ |
-|                    |  $Z \times t_1 \times \beta_{\text{max}} \rightarrow E$ |
-| single-temperature |  $Z \rightarrow E, T$          |
-|                    |  $Z \times t_1 \rightarrow E, T$ |
-|                    |  $Z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ |
+|                    | ② $Z \times t_1 \rightarrow E$ |
+|                    | ③ $Z \times t_1 \times \beta_{\text{max}} \rightarrow E$ |
+| single-temperature | ④ $Z \rightarrow E, T$         |
+|                    | ⑤ $Z \times t_1 \rightarrow E, T$ |
+|                    | ⑥ $Z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ |
 
 ## Fourier-DON算法设计：
 
-我们的目标是找一个替代模型，用于处理多输入算子 $G: X_1\times X_2\times ... \times X_n\rightarrow Y$ ，其中 $X_1\times X_2\times ... \times X_n$ 表示 $n$ 个不同的输入函数空间， $Y$ 是输出函数空间。
+本项目的目标是找一个替代模型，用于处理多输入算子 $G: X_1\times X_2\times ... \times X_n\rightarrow Y$ ，其中 $X_1\times X_2\times ... \times X_n$ 表示 $n$ 个不同的输入函数空间， $Y$ 是输出函数空间。以上述算子学习问题②为例，假设有 $N$ 对参考数值解 $\{Z^{(k)},\beta^{(k)},E^{(k)}\}_{k=1}^N$ ，则 $Z^{(k)}\in X_1$ ， $\beta^{(k)}\in X_2$ 对应， $E^{(k)}\in Y$ 对应，目标是训练一个神经网络模型 $G_{\theta}$ ，其中 $\theta$ 表示神经网络的可学习参数，通过最小化损失函数 $C$ 来近似 $G$ ：
 
+$$
+\begin{equation}
+   \min_{\theta}\frac{1}{N}\sum_{k=1}^N C(G_{\theta}(Z^{(k)},\beta^{(k)}),E^{(k)}).
+\end{equation}
+$$
 
-
-
-
-
+该算法的关键组成部分在于Fourier层，它结合了核积分变换和逐点变换，随后应用非线性激活函数 $\sigma$ ：
+\begin{equation}
+   V^{(l+1)} = \sigma(F^{-1}(R\cdot F(V^{(l)})) + W(V^{(l)})).
+\end{equation}
 
 
 

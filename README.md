@@ -58,7 +58,7 @@ $$
 
 ## Fourier-DON算法设计：
 
-本项目的目标是找一个替代模型，用于处理多输入算子 $\mathscr{G}: \mathscr{X}_1\times\mathscr{X}_2\times ... \times\mathscr{X}_n\rightarrow\mathscr{Y}$ ，其中 $\mathscr{X}_1\times\mathscr{X}_2\times ... \times\mathscr{X}_n$ 表示 $n$ 个不同的输入函数空间， $\mathscr{Y}$ 是输出函数空间。以上述算子学习问题②为例，假设有 $N$ 对参考数值解 $\{Z^{(k)},\beta^{(k)},E^{(k)}\}_{k=1}^N$ ，则 $Z^{(k)}\in \mathscr{X}_1, \beta^{(k)}\in \mathscr{X}_2, E^{(k)}\in \mathscr{Y}$ ，目标是训练一个神经网络模型 $\mathscr{G}_{\theta}$ ，其中 $\theta$ 表示神经网络的可学习参数，通过最小化损失函数 $\mathscr{C}$ 来近似 $\mathscr{G}$ ：
+本项目的目标是找一个替代模型，用于处理多输入算子 $\mathscr{G}: \mathscr{X}_1\times\mathscr{X}_2\times ... \times\mathscr{X}_n\rightarrow\mathscr{Y}$ ，其中 $\mathscr{X}_1\times\mathscr{X}_2\times ... \times\mathscr{X}_n$ 表示 $n$ 个不同的输入函数空间， $\mathscr{Y}$ 是输出函数空间。以上述算子学习问题②为例，假设有 $N$ 对参考数值解 $\{Z^{(k)},\beta^{(k)},E^{(k)}\}_{k=1}^N$ ，则 $Z^{(k)}\in \mathscr{X}_1, \beta^{(k)}\in \mathscr{X}_2, E^{(k)}\in \mathscr{Y}$ ，目标是训练一个神经网络模型 $\mathscr{G}_{\theta}$ ，其中 $\theta$ 表示神经网络的可学习参数，通过最小化损失函数�来近似 $\mathscr{G}$ ：
 
 $$
 \begin{equation}

@@ -49,12 +49,12 @@ $$
 
 |                    | Tasks                          |
 |--------------------|--------------------------------|
-| single-temperature | \( Z \rightarrow E \)          |
-|                    | \( Z \times t_1 \rightarrow E \) |
-|                    | \( Z \times t_1 \times \beta_{\text{max}} \rightarrow E \) |
-| single-temperature | \( Z \rightarrow E, T \)       |
-|                    | \( Z \times t_1 \rightarrow E, T \) |
-|                    | \( Z \times t_1 \times \beta_{\text{max}} \rightarrow E, T \) |
+| single-temperature | ① $Z \rightarrow E$            |
+|                    |  $Z \times t_1 \rightarrow E$ |
+|                    |  $Z \times t_1 \times \beta_{\text{max}} \rightarrow E$ |
+| single-temperature |  $Z \rightarrow E, T$          |
+|                    |  $Z \times t_1 \rightarrow E, T$ |
+|                    |  $Z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ |
 
 ## Fourier-DON算法设计：
 

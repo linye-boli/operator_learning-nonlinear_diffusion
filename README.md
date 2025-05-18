@@ -166,16 +166,89 @@ $$
 两种架构的模型参数均使用小批量梯度下降的Adam优化器。采用余弦退火调度器，设置初始学习率为0.001，训练过程在100个周期内完成。默认情况下所有任务使用4个样本的批次大小，600个训练样本和100个测试样本。
 
 为了确保硬件和软件的一致性，所有训练和预测过程均在配备有n Intel Xeon W-2255 10核处理器和NVIDIA RTX A6000 GPU的PC上执行。神经网络使用Pytorch实现，并采用随机种子以保证实验的可重复性和再现性。
+
+## 代码介绍：
+
+该存储库包含脚本，以重现有关算子学习的论文结果，以解决非线性扩散问题。请按照以下说明进行设置，以设置项目，运行实验和过程结果。
+
+### 项目结构：
    
+```
+operator_learning-nonlinear_diffusion/
+├── dataset/
+│   ├── nd/
+│   └── nd_seq/
+├── result/
+│   ├── exps/
+│   ├── seq_exps/
+│   ├── figs/
+│   └── result_process.py
+├── src/
+│   ├── train.py
+│   ├── nets.py
+│   ├── utils.sh
+│   ├── default_exps.sh
+│   ├── nlayer_exps.sh
+│   ├── ntrain_exps.sh
+│   ├── modes_exps.sh
+│   ├── width_exps.sh
+│   ├── superres_exps.sh
+│   └── seq_exps.sh
+├── requirements.txt
+└── README.md
+```
+
+### 配置准备：
+
+- 一个配备兼容GPU的系统（需确保可用的有效GPU设备ID）
+
+- 已安装Python（版本需与依赖项兼容，例如Python 3.8+）及Bash环境
+
+- 需安装`requirements.txt`中列出的Python依赖项（如`torch`、`numpy`、`scipy`、`matplotlib`）
+
+- 确保安装支持GPU的Pytorch版本
+
+- 可访问数据集及结果文件（下载链接如下）
+
+### 设置：
+
+1. **下载数据集以及结果**：
+   - 从[https://pan.baidu.com/s/1CEs6UBiWCt3dzjk-vs98og?pwd=nrde](https://pan.baidu.com/s/1CEs6UBiWCt3dzjk-vs98og?pwd=nrde)访问数据集和结果
+   - 解压`dataset.zip`和`result.zip`文件
+   - 根据上述项目结构，将提取的`dataset/`和`result/`文件夹放在根目录中
+  
+2. **验证项目结构**：
+   - 确保项目目录与上述结构匹配，包括`requirements.txt`文件
+
+3. **安装依赖项**：
+   - 创建虚拟环境（建议避免冲突）：
+     ```bash
+     python -m venv env
+     source env/bin/activate  # On Windows: env\Scripts\activate
+     ```
+   - 安装`requirements.txt`中列出的依赖项：
+     ```bash
+     pip install -r requirements.txt
+     ```
+### 运行实验：
+
+以下脚本为论文中的特定表格和图像结果：
+
+| 脚本                  | 对应的结果                                |
+|-----------------------|-------------------------------------------|
+| `default_exps.sh`     | Table II, Table III, Table IV, Fig. 7, Fig. 8 |
+| `nlayer_exps.sh`      | Fig. 9                                   |
+| `ntrain_exps.sh`      | Fig. 9                                   |
+| `modes_exps.sh`       | Fig. 9                                   |
+| `width_exps.sh`       | Fig. 9                                   |
+| `superres_exps.sh`    | Table V                                  |
+| `seq_exps.sh`         | Fig. 10, Table VI                        |
+
+#### 实验运行步骤：
 
 
 
-
-
-
-
-
-
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Operator Learning for Nonlinear Diffusion Problems
 
 This repository contains scripts to reproduce the results from the paper on operator learning for solving nonlinear diffusion problems. Follow the instructions below to set up the project, run experiments, and process results.

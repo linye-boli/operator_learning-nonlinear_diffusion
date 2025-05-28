@@ -39,7 +39,7 @@ $$
 
 其中 $\Omega = [0,1]\times[0,1]$ ；辐射扩散系数 $D_L, K_L$ 同样选用限流形式，即 $D_L = \frac{1}{3\sigma_{\alpha}+\frac{|\nabla E|}{E}}, \sigma_{\alpha} = \frac{z^3}{E^{3/4}}, K_L = \frac{T^4}{T^{3/2}z+T^{5/2}|\nabla T|}$ 。
 
-对于上述单温、双温问题，电离度函数 $Z$ 采用双方形，即在 $\Omega$ 内的两个0.25×0.25的方形区域中， $Z=9$ ；其他时候 $Z=1$ 。
+对于上述单温、双温问题，材料函数 $Z$ 采用双方形，即在 $\Omega$ 内的两个0.25×0.25的方形区域中， $Z=9$ ；其他时候 $Z=1$ 。
 
 初值条件采用常数初值，即 $g(x,y,t) = 0.01$ ；边值条件采用线性边值，即当 $t<t_1$ 时， $\beta(x,y,t)=\frac{\beta_{\text{max}}}{t_1} t$ ；当 $t\leq t_1$ 时， $\beta(x,y,t)=\beta_{\text{max}}$ 。
 
@@ -58,21 +58,21 @@ $$
 
 ## Fourier-DON算法设计：
 
-本项目的目标是找一个神经网络替代模型，用于处理多输入算子 $𝒳_1\times 𝒳_2\times ... \times 𝒳_n\rightarrow 𝒴$ ，其中 $𝒳_1\times 𝒳_2\times ... \times 𝒳_n$ 表示 $n$ 个不同的输入函数空间，𝒴是输出函数空间。为此，对原始DON进行修改，使其分支网络和主干网络能分别接受离散电离度函数 $Z$ 和离散源函数 $\xi$ ，开发了两种变体：第一类Fourier-DON和第二类Fourier-DON。
+本项目的目标是找一个神经网络替代模型，用于处理多输入算子 $𝒳_1\times 𝒳_2\times ... \times 𝒳_n\rightarrow 𝒴$ ，其中 $𝒳_1\times 𝒳_2\times ... \times 𝒳_n$ 表示 $n$ 个不同的输入函数空间，𝒴是输出函数空间。为此，对原始DON进行修改，使其分支网络和主干网络能分别接受离散材料函数（表示为 $Z$ ）和离散源函数（表示为 $\xi$ ），开发了两种变体：第一类Fourier-DON和第二类Fourier-DON。
 
 下面使用单温任务来描述两个变体。对于双温任务，只需使用两个Fourier-DON网络来学习目标函数 $𝐄,𝐓∈ℝ^{m\times m}$ 即可，其中 $m$ 表示空间维度。
-
-### 预处理：
-
-两种架构的预处理过程相同。对于分支网络，输入𝐙被缩放到范围(0,1)，并与相应的二维网格坐标 $X,Y∈ℝ^{m\times m}$ 拼接，形成 $[Z,X,Y]∈ℝ^{m\times m\times 3}$ 。同样地，主干网络的输入 $t_1∈ℝ$ 和 $\beta_{\text{max}}∈ℝ$ 也被缩放到(0,1)，并拼接成 $[t_1,\beta_{\text{max}}]∈ℝ^2$ 。
 
 ### 第一类Fourier-DON：
 
 第一类Fourier-DON的架构如下图所示：
 
-<img src="./result/figs/fno-deeponet-type1_00.jpg" alt="type1-model" width="400" />
+<img src="./result/figs/fno-deeponet-type1_00.jpg" alt="type1-model" width="300" />
 
-设 $𝐙∈ℝ^{m\times m}$ 表示输入到分支网络 $B_\theta$ 的离散电离度函数 $Z$ ， $\xi∈ℝ^p$ 表示输入到主干网络 $T_\theta$ 的离散源函数 $\beta$ 。分支和主干网络的输出为：
+将材料函数𝐙缩放到范围(0,1)，并与相应的二维网格坐标 $X,Y∈ℝ^{m\times m}$ 拼接，形成 $[Z,X,Y]∈ℝ^{m\times m\times 3}$ ，作为分支网络的输入层。再将源函数的参数 $t_1∈ℝ$ 和 $\beta_{\text{max}}∈ℝ$ 也缩放到(0,1)，并拼接成 $[t_1,\beta_{\text{max}}]∈ℝ^2$ ，作为主干网络的输入层。
+
+分支网络首先由一个线性层组成，该层将 $ℝ^{m\times m\times 3}$ 映射到 $ℝ^{m\times m\times 32}$ ；随后是四个Fourier层，每层包含12个模式和32个通道，层内的逐点变换块实现为一个两层FCN，每层有32个隐藏单元。主干网络设置为一个四层FCN，每层有32个隐藏单元。GeLU激活函数应用于除最后一层外两个网络的所有层。
+
+分支和主干网络的输出为：
 
 $$
 \begin{aligned}
@@ -81,23 +81,29 @@ $$
 \end{aligned}
 $$
 
-其中 $c$ 是通道数。
+其中 $c$ 是通道数，𝐕可以看成一列基函数 $[𝐕_1,...,𝐕_c]$ ，𝛚可以看成一列系数 $[𝛚_1,...,𝛚_c]$ 。对于有固定源函数的任务，可以省略主干网络。
 
 离散化的目标函数 $𝐄∈ℝ^{m\times m}$ 近似为：
 
 $$
 \begin{equation}
-   𝐄̃ = \sum_i 𝛚_i 𝐕_i,
+   𝐄̃ = \sum_i 𝛚_i 𝐕_i.
 \end{equation}
 $$
 
-其中 $𝐕_i∈ℝ^{m\times m}$ 是第 $i$ 个离散化的基函数， $𝛚_i∈ℝ$ 是其系数。
+损失函数定义为相对L2范数误差：
 
-分支网络由一个线性层组成，该层将 $ℝ^{m\times m\times 3}$ 映射到 $ℝ^{m\times m\times 32}$ 。随后是四个Fourier层，每层包含12个模式和32个通道，层内的逐点变换块𝒲实现为一个两层FCN，每层有32个隐藏单元。
+$$
+\begin{equation}
+   L = \frac{1}{N} \sum_{k=1}^N \frac{‖𝐄^{(k)}-𝐄̃^{(k)}‖₂}{‖𝐄^{(k)}‖₂},
+\end{equation}
+$$
 
-主干网络是一个四层FCN，每层有32个隐藏单元。
+其中 $N$ 表示样本数， $𝐄^{(k)}$ 是第 $k$ 个FEM参考解， $𝐄̃^{(k)}$ 是神经网络的相应预测。
 
-GeLU激活函数应用于除最后一层外两个网络的所有层。
+以任务 $Z \times t_1 \times \beta_{\text{max}} \rightarrow E$ 为例，第一类Fourier-DON的具体训练过程如下图所示：
+
+<img src="./result/figs/fno-deeponet-type1-train_00.jpg" alt="type1-train" width="300" />
 
 ### 第二类Fourier-DON：
 
@@ -117,18 +123,6 @@ $$
 分支线性和主干层均通过一个线性层实现，该层将 $ℝ^{m\times m\times 3}$ 映射到 $ℝ^{m\times m\times 32}$ ，然后进行逐元素乘法。输出 $𝐕∈ℝ^{m\times m\times 32}$ 被送入一个FNO解码器，该解码器包含四个Fourier层（每个层与上述第一类中的相同）以及一个包含32个隐藏单元的两层FCN。
 
 对于具有固定源函数 $\beta(x,y,t)$ 的任务，主干网络被省略，分支网络在傅里叶层之后增加了一个额外的线性投影层，以直接将输出映射到解空间。
-
-### 损失函数：
-
-损失函数定义为相对L2范数误差：
-
-$$
-\begin{equation}
-   ‖L‖₂ = \frac{1}{N} \sum_{k=1}^N \frac{‖𝐄^{(k)}-𝐄̃^{(k)}‖₂}{‖𝐄^{(k)}‖₂},
-\end{equation}
-$$
-
-其中 $N$ 表示样本数， $𝐄^{(k)}$ 是第 $k$ 个FEM参考解， $𝐄̃^{(k)}$ 是神经网络的相应预测。
 
 ### 训练参数：
 

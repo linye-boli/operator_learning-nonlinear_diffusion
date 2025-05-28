@@ -109,7 +109,7 @@ $$
 
 第二类Fourier-DON的架构如下图所示，解码器表示为 $\Phi_\theta$ 。
 
-<img src="./result/figs/fno-deeponet-type2_00.jpg" alt="type2-model" width="300" />
+<img src="./result/figs/fno-deeponet-type2_00.jpg" alt="type2-model" width="500" />
 
 分支网络和主干网络的输入层与第一类中的相同。
 
@@ -219,7 +219,35 @@ operator_learning-nonlinear_diffusion/
 
 #### 实验运行步骤：
 
+1. 进入`src/`目录：
+   ```bash
+   cd src
+   ```
 
+2. 运行目标脚本，指定GPU设备ID（例如`0`或`1`）：
+   ```bash
+   bash <script_name>.sh device=<ID>
+   ```
+   示例：
+   ```bash
+   bash default_exps.sh device=0
+   ```
+
+3. 按需重复运行其他脚本（如`nlayer_exps.sh`等）。
+
+#### 使用`train.py`脚本：
+
+`train.py`用于训练和评估傅里叶神经算子模型（`FNO2d`、`FDON2d`、`FDON2d_II`），支持热扩散等任务。
+
+**核心功能**
+- **训练**：使用L2损失、Adam优化器和余弦退火学习率调度。支持`FNO2d`（输入：初值条件）和`FDON2d`/`FDON2d_II`（输入：初边值条件）。
+- **推理**：计算测试预测、相对L2损失和推理时间（GPU/CPU）。
+- **输出**：模型权重、预测结果、损失曲线和推理时间保存至`../result/<task>/<component>/`。
+
+**命令示例**
+```bash
+python train.py --task heat-1T-zsquares --arch fno --num-train 600 --num-test 100 --batch-size 4 --device 0
+```
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Operator Learning for Nonlinear Diffusion Problems

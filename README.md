@@ -60,7 +60,7 @@ $$
 
 本项目的目标是找一个神经网络替代模型，用于处理多输入算子 $𝒳_1\times 𝒳_2\times ... \times 𝒳_n\rightarrow 𝒴$ ，其中 $𝒳_1\times 𝒳_2\times ... \times 𝒳_n$ 表示 $n$ 个不同的输入函数空间，𝒴是输出函数空间。为此，对原始DON进行修改，使其分支网络和主干网络能分别接受离散电离度函数 $Z$ 和离散源函数 $\xi$ ，开发了两种变体：第一类Fourier-DON和第二类Fourier-DON。
 
-下面使用单温任务来描述两个变体。对于双温任务，只需使用两个Fourier-DON网络来学习目标函数 $𝐄,𝐓∈ℝ^{m\times m}$ 即可。
+下面使用单温任务来描述两个变体。对于双温任务，只需使用两个Fourier-DON网络来学习目标函数 $𝐄,𝐓∈ℝ^{m\times m}$ 即可，其中 $m$ 表示空间维度。
 
 ### 预处理：
 
@@ -69,6 +69,8 @@ $$
 ### 第一类Fourier-DON：
 
 第一类Fourier-DON的架构如下图所示：
+
+<img src="./result/figs/fno-deeponet-type1_00.jpg" alt="type1-model" width="400" />
 
 设 $𝐙∈ℝ^{m\times m}$ 表示输入到分支网络 $B_\theta$ 的离散电离度函数 $Z$ ， $\xi∈ℝ^p$ 表示输入到主干网络 $T_\theta$ 的离散源函数 $\beta$ 。分支和主干网络的输出为：
 

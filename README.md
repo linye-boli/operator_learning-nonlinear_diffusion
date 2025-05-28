@@ -103,7 +103,7 @@ $$
 
 以任务 $Z \times t_1 \times \beta_{\text{max}} \rightarrow E$ 为例，第一类Fourier-DON的具体训练过程如下图所示：
 
-<img src="./result/figs/fno-deeponet-type1-train_00.jpg" alt="type1-train" width="300" />
+<img src="./result/figs/fno-deeponet-type1-train_00.jpg" alt="type1-train" width="500" />
 
 ### 第二类Fourier-DON：
 

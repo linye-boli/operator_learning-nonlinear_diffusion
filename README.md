@@ -109,7 +109,7 @@ $$
 
 第二类Fourier-DON的架构如下图所示，解码器表示为 $\Phi_\theta$ 。
 
-<img src="./result/figs/fno-deeponet-type2_00.jpg" alt="type2-model" width="500" />
+<img src="./result/figs/fno-deeponet-type2_00.jpg" alt="type2-model" width="400" />
 
 分支网络和主干网络的输入层与第一类中的相同。
 

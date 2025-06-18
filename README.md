@@ -322,13 +322,13 @@ python train.py --task heat-1T-zsquares --arch fno --num-train 600 --num-test 10
 
 考虑任务 $Z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ ，不同训练数据分辨率对精度的影响如下：
 
-<img src="./result/figs/table5.png" alt="table5" width="700" />
+<img src="./result/figs/table5.png" alt="table5" width="400" />
 
 #### 时间泛化：
 
 考虑任务 $Z \times t_1 \times \beta_{\text{max}} \rightarrow E$ ，不同时刻 $\tau$ 下两类Fourier-DON的 $\ell_2$ 相对误差如下：
 
-<img src="./result/figs/table6.png" alt="table6" width="400" />
+<img src="./result/figs/table6.png" alt="table6" width="700" />
 
 不同时刻 $\tau$ 下参考解、两类Fourier-DON结果以及绝对误差可视化如下：
 

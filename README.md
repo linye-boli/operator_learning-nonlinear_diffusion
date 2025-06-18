@@ -66,7 +66,7 @@ $$
 
 第一类Fourier-DON的架构如下图所示，其中分支网络表示为 $B_\theta$ ，主干网络表示为 $T_\theta$ 。
 
-<img src="./result/figs/fno-deeponet-type1_00.jpg" alt="type1-model" width="300" />
+<img src="./result/figs/fno-deeponet-type1.jpg" alt="type1-model" width="300" />
 
 将材料函数𝐙缩放到范围(0,1)，并与相应的二维网格坐标 $X,Y∈ℝ^{m\times m}$ 拼接，形成 $[Z,X,Y]∈ℝ^{m\times m\times 3}$ ，作为分支网络的输入层。再将边值函数的参数 $t_1∈ℝ$ 和 $\beta_{\text{max}}∈ℝ$ 也缩放到(0,1)，并拼接成 $[t_1,\beta_{\text{max}}]∈ℝ^2$ ，作为主干网络的输入层。
 
@@ -103,13 +103,13 @@ $$
 
 以任务 $Z \times t_1 \times \beta_{\text{max}} \rightarrow E$ 为例，第一类Fourier-DON的具体训练过程如下图所示：
 
-<img src="./result/figs/fno-deeponet-type1-train_00.jpg" alt="type1-train" width="700" />
+<img src="./result/figs/fno-deeponet-type1-train.jpg" alt="type1-train" width="700" />
 
 ### 第二类Fourier-DON：
 
 第二类Fourier-DON的架构如下图所示，解码器表示为 $\Phi_\theta$ 。
 
-<img src="./result/figs/fno-deeponet-type2_00.jpg" alt="type2-model" width="400" />
+<img src="./result/figs/fno-deeponet-type2.jpg" alt="type2-model" width="400" />
 
 分支网络和主干网络的输入层与第一类中的相同。
 
@@ -132,7 +132,7 @@ $$
 
 以任务 $Z \times t_1 \times \beta_{\text{max}} \rightarrow E$ 为例，第二类Fourier-DON的具体训练过程如下图所示：
 
-<img src="./result/figs/fno-deeponet-type2-train_00.jpg" alt="type2-train" width="700" />
+<img src="./result/figs/fno-deeponet-type2-train.jpg" alt="type2-train" width="700" />
 
 ## 代码介绍：
 
@@ -250,18 +250,21 @@ cd src
 bash default_exps.sh device=0
 ```
 
-对于有固定边值函数的任务， $\ell_2$ 相对误差如下：
+对于固定边值函数的任务， $\ell_2$ 相对误差如下：
 
-| Tasks                          | \( \|L\|_2(E) \) |               | \( \|L\|_2(T) \) |               |
-|--------------------------------|------------------|---------------|------------------|---------------|
-|                                | Type-1           | Type-2        | Type-1           | Type-2        |
-|--------------------------------|------------------|---------------|------------------|---------------|
-| Z × t₁ → E                     | 1.289e-02        | 1.296e-02     | -                | -             |
-| Z × t₁ × bₘₐₓ → E              | 1.535e-02        | 1.316e-02     | -                | -             |
-| Z × t₁ → E, T                  | 1.248e-02        | 1.253e-02     | 1.363e-02        | 1.020e-02     |
-| Z × t₁ × bₘₐₓ → E, T           | 1.399e-02        | 1.277e-02     | 1.536e-02        | 9.947e-03     |
+<img src="./result/figs/table2.png" alt="table2" width="700" />
 
+对于非固定边值函数的任务， $\ell_2$ 相对误差如下：
 
+<img src="./result/figs/table3.png" alt="table3" width="700" />
+
+全部算子学习任务的计算效率如下：
+
+<img src="./result/figs/table4.png" alt="table3" width="700" />
+
+默认设置下全部算子学习任务的训练动态如下：
+
+<img src="./result/figs/table3.png" alt="table3" width="700" />
 
 3. 按需重复运行其他脚本（如`nlayer_exps.sh`等）。
 

@@ -39,7 +39,7 @@ $$
 
 其中 $\Omega = [0,1]\times[0,1]$ ；辐射扩散系数 $D_L, K_L$ 同样选用限流形式，即 $D_L = \frac{1}{3\sigma_{\alpha}+\frac{|\nabla E|}{E}}, \sigma_{\alpha} = \frac{z^3}{E^{3/4}}, K_L = \frac{T^4}{T^{3/2}z+T^{5/2}|\nabla T|}$ 。
 
-对于上述单温、双温问题，材料函数 $Z$ 采用双方形，即在 $\Omega$ 内的两个0.25×0.25的方形区域中， $Z=9$ ；其他时候 $Z=1$ 。
+对于上述单温、双温问题，材料函数 $z$ 采用双方形，即在 $\Omega$ 内的两个0.25×0.25的方形区域中， $z=9$ ；其他时候 $z=1$ 。
 
 初值条件采用常数初值，即 $g(x,y,t) = 0.01$ ；边值条件采用线性边值，即当 $t<t_1$ 时， $\beta(x,y,t)=\frac{\beta_{\text{max}}}{t_1} t$ ；当 $t\leq t_1$ 时， $\beta(x,y,t)=\beta_{\text{max}}$ 。
 
@@ -49,12 +49,12 @@ $$
 
 |                    | Tasks                          |
 |--------------------|--------------------------------|
-| single-temperature | $Z \rightarrow E$              |
-|                    | $Z \times t_1 \rightarrow E$   |
-|                    | $Z \times t_1 \times \beta_{\text{max}} \rightarrow E$ |
-| two-temperature    | $Z \rightarrow E, T$           |
-|                    | $Z \times t_1 \rightarrow E, T$ |
-|                    | $Z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ |
+| single-temperature | $z \rightarrow E$              |
+|                    | $z \times t_1 \rightarrow E$   |
+|                    | $z \times t_1 \times \beta_{\text{max}} \rightarrow E$ |
+| two-temperature    | $z \rightarrow E, T$           |
+|                    | $z \times t_1 \rightarrow E, T$ |
+|                    | $z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ |
 
 ## Fourier-DON算法设计：
 
@@ -68,7 +68,7 @@ $$
 
 <img src="./result/figs/fno-deeponet-type1.jpg" alt="type1-model" width="300" />
 
-将材料函数𝐙缩放到范围(0,1)，并与相应的二维网格坐标 $X,Y∈ℝ^{m\times m}$ 拼接，形成 $[Z,X,Y]∈ℝ^{m\times m\times 3}$ ，作为分支网络的输入层。再将边值函数的参数 $t_1∈ℝ$ 和 $\beta_{\text{max}}∈ℝ$ 也缩放到(0,1)，并拼接成 $[t_1,\beta_{\text{max}}]∈ℝ^2$ ，作为主干网络的输入层。
+将材料函数𝐙缩放到范围(0,1)，并与相应的二维网格坐标 $X,Y∈ℝ^{m\times m}$ 拼接，形成 $[z,X,Y]∈ℝ^{m\times m\times 3}$ ，作为分支网络的输入层。再将边值函数的参数 $t_1∈ℝ$ 和 $\beta_{\text{max}}∈ℝ$ 也缩放到(0,1)，并拼接成 $[t_1,\beta_{\text{max}}]∈ℝ^2$ ，作为主干网络的输入层。
 
 分支网络首先由一个线性层组成，该层将 $ℝ^{m\times m\times 3}$ 映射到 $ℝ^{m\times m\times 32}$ ；随后是四个Fourier层，每层包含12个模式和32个通道，层内的逐点变换块实现为一个两层FCN，每层有32个隐藏单元。主干网络设置为一个四层FCN，每层有32个隐藏单元。GeLU激活函数应用于除最后一层外两个网络的所有层。
 
@@ -101,7 +101,7 @@ $$
 
 其中 $N$ 表示样本数， $𝐄^{(k)}$ 是第 $k$ 个FEM参考解， $𝐄̃^{(k)}$ 是神经网络的相应预测。
 
-以任务 $Z \times t_1 \times \beta_{\text{max}} \rightarrow E$ 为例，第一类Fourier-DON的具体训练过程如下图所示：
+以任务 $z \times t_1 \times \beta_{\text{max}} \rightarrow E$ 为例，第一类Fourier-DON的具体训练过程如下图所示：
 
 <img src="./result/figs/fno-deeponet-type1-train.jpg" alt="type1-train" width="700" />
 
@@ -130,7 +130,7 @@ $$
 
 损失函数定义与第一类中的相同。
 
-以任务 $Z \times t_1 \times \beta_{\text{max}} \rightarrow E$ 为例，第二类Fourier-DON的具体训练过程如下图所示：
+以任务 $z \times t_1 \times \beta_{\text{max}} \rightarrow E$ 为例，第二类Fourier-DON的具体训练过程如下图所示：
 
 <img src="./result/figs/fno-deeponet-type2-train.jpg" alt="type2-train" width="700" />
 
@@ -140,7 +140,7 @@ $$
 
 对于单温问题，取129×129的网格点，设置时间步长为0.001，皮卡迭代至收敛极限为0.001或迭代100步，将有限元法求出的结果作为参考解。对于双温问题，取257×257的网格点，设置时间步长为0.001，皮卡迭代至收敛极限为0.01或迭代100步，将有限元法求出的结果作为参考解。
 
-输入还包括随机采样的 $Z,t_1,\beta_{\text{max}}$ 。参数 $Z$ 的两个方形区域左下角坐标从(0,1)中随机采样，参数 $t_1$ 在[0,1]中随机采样，参数 $\beta_{\text{max}}$ 在[9,11]中随机采样，用于构建源函数 $\beta(x,y,t)$ 。对于仅以 $Z$ 为输入的任务，设 $t_1=0.5,\beta_{\text{max}}=10$ ；对于仅以 $Z,t_1$ 为输入的任务，设 $\beta_{\text{max}}=10$ 。
+输入还包括随机采样的 $z,t_1,\beta_{\text{max}}$ 。参数 $Z$ 的两个方形区域左下角坐标从(0,1)中随机采样，参数 $t_1$ 在[0,1]中随机采样，参数 $\beta_{\text{max}}$ 在[9,11]中随机采样，用于构建源函数 $\beta(x,y,t)$ 。对于仅以 $z$ 为输入的任务，设 $t_1=0.5,\beta_{\text{max}}=10$ ；对于仅以 $z,t_1$ 为输入的任务，设 $\beta_{\text{max}}=10$ 。
 
 两类变体算子均使用Adam优化器，利用小批量梯度下降进行优化。采用余弦退火调度器，设置初始学习率为0.001，训练周期为100个，批次大小为4个。默认训练样本为600个，测试样本为100个。
 
@@ -306,13 +306,13 @@ python train.py --task heat-1T-zsquares --arch fno --num-train 600 --num-test 10
 
 <img src="./result/figs/training_dynamics.jpg" alt="training_dynamics" width="700" />
 
-以任务 $Z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ 为例，参考解、两类Fourier-DON以及绝对误差的可视化如下：
+以任务 $z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ 为例，参考解、两类Fourier-DON以及绝对误差的可视化如下：
 
 <img src="./result/figs/ablation_study.jpg" alt="ablation_study" width="700" />
 
 ### 消融实验：
 
-以任务 $Z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ 为例，不同训练样本数量、Fourier层数、Fourier层通道数以及Fourier模数对精度的影响如下：
+以任务 $z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ 为例，不同训练样本数量、Fourier层数、Fourier层通道数以及Fourier模数对精度的影响如下：
 
 <img src="./result/figs/heat_2T_preds.jpg" alt="heat_2T_preds" width="600" />
 
@@ -320,13 +320,13 @@ python train.py --task heat-1T-zsquares --arch fno --num-train 600 --num-test 10
 
 #### 超分辨率泛化：
 
-考虑任务 $Z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ ，不同训练数据分辨率对精度的影响如下：
+考虑任务 $z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ ，不同训练数据分辨率对精度的影响如下：
 
 <img src="./result/figs/table5.png" alt="table5" width="400" />
 
 #### 时间泛化：
 
-考虑任务 $Z \times t_1 \times \beta_{\text{max}} \rightarrow E$ ，不同时刻 $\tau$ 下两类Fourier-DON的 $\ell_2$ 相对误差如下：
+考虑任务 $z \times t_1 \times \beta_{\text{max}} \rightarrow E$ ，不同时刻 $\tau$ 下两类Fourier-DON的 $\ell_2$ 相对误差如下：
 
 <img src="./result/figs/table6.png" alt="table6" width="700" />
 
@@ -356,6 +356,40 @@ python train.py --task heat-1T-zsquares --arch fno --num-train 600 --num-test 10
 Fourier Neural Operator (FNO) and Deep Operator Network (DON) are representative approaches for learning differential operators, offering novel paradigms to address the challenge of cross-condition generalization in complex physical systems. FNO employs spectral-domain global convolutional kernels to capture long-range dependencies in multi-scale field evolution via Fourier transforms, while DON achieves efficient mapping in high-dimensional function spaces through implicit basis function decomposition and coefficient prediction. Existing operator learning methods have demonstrated advantages in linear and weakly nonlinear scenarios but still face challenges in multi-scale, strongly nonlinear problems.  
 
 This project introduces two Fourier-DON variant architectures that combine FNO and DON to learn the mapping from equation conditions to solutions of the radiative diffusion equation at specific time points: The first variant uses FNO to generate basis functions and employs a fully connected network for coefficient processing, while the second adopts element-wise feature combination followed by an FNO decoder. Compared to traditional numerical methods (e.g., finite element methods), Fourier-DON is faster, more accurate, and more generalizable, enabling efficient simulation in complex physical systems.
+
+## Nonlinear Radiation Diffusion Problem:
+
+The nonlinear radiation diffusion problem represents a classic example of multiscale strongly coupled transport equations. At its core, it describes the nonlinear energy exchange process between radiation energy and material energy mediated by photon transport. The governing equations for this process can be expressed as follows.
+
+### Single-Temperature Problem:
+
+$$
+\begin{aligned}
+   & \frac{\partial E}{\partial t}-\nabla\cdot(D_L\nabla E) = 0, \quad(x,y,t)\in\Omega\times[0,1] \\
+   & 0.5E+D_L\nabla E\cdot n = \beta(x,y,t), \quad(x,y,t)\in\lbrace x=0\rbrace\times[0,1] \\
+   & 0.5E+D_L\nabla E\cdot n = 0, \quad(x,y,t)\in\partial\Omega\setminus\lbrace x=0\rbrace\times[0,1] \\
+   & E|_{t=0} = g(x,y,0)
+\end{aligned}
+$$
+
+where $\Omega = [0,1]\times[0,1]$ , while the radiation diffusion coefficient $D_L$ adopts the flux-limited form, expressed as $D_L = \frac{1}{3\sigma_{\alpha}+\frac{|\nabla E|}{E}}, \sigma_{\alpha} = \frac{z^3}{E^{3/4}}$ .
+
+### Two-Temperature Problem:
+
+$$
+\begin{aligned}
+   & \frac{\partial E}{\partial t} - \nabla \cdot (D_L \nabla E) = \sigma_{\alpha}(T^4 - E), \quad(x,y,t)\in\Omega\times[0,1] \\
+   & \frac{\partial T}{\partial t} - \nabla \cdot (K_L \nabla T) = \sigma_{\alpha}(E - T^4), \quad(x,y,t)\in\Omega\times[0,1] \\
+   & 0.5E + D_L \nabla E \cdot n = \beta(x,y,t), \quad (x,y,t) \in \lbrace x=0 \rbrace \times [0,1] \\
+   & 0.5E + D_L \nabla E \cdot n = 0, \quad (x,y,t) \in \partial\Omega \setminus \lbrace x=0 \rbrace \times [0,1] \\
+   & K_L \nabla T \cdot n = 0, \quad (x,y,t) \in \partial\Omega \times [0,1] \\
+   & E\vert_{t=0} = T^4\vert_{t=0} = g(x,y,0)
+\end{aligned}
+$$
+
+where $\Omega = [0,1]\times[0,1]$ , while the radiation diffusion coefficient $D_L, K_L$ also adopts the flux-limited form, expressed as $D_L = \frac{1}{3\sigma_{\alpha}+\frac{|\nabla E|}{E}}, \sigma_{\alpha} = \frac{z^3}{E^{3/4}}, K_L = \frac{T^4}{T^{3/2}z+T^{5/2}|\nabla T|}$ .
+
+For the single-temperature and two-temperature problems mentioned above, the material function $z$ adopts a double-square configuration, where $z=9$ within two 0.25×0.25 square regions in $\Omega$ , and $z=1$ elsewhere.
 
 This repository contains scripts to reproduce the results from the paper on operator learning for solving nonlinear diffusion problems. Follow the instructions below to set up the project, run experiments, and process results.
 

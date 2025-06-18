@@ -183,7 +183,7 @@ operator_learning-nonlinear_diffusion/
 |seed        |随机种子（用于结果复现）            |0           |
 |lr          |初始学习率                        |1e-3         |
 |epochs      |训练周期数                        |100          |
-|modes       |x和y方向的傅里叶模数               |12           |
+|modes       |x和y方向的Fourier模数               |12           |
 |width       |网络通道数                        |32           |
 |grid-size   |空间网格分辨率                     |129          |
 |output-dir  |训练结果保存目录                   |../result/   |
@@ -225,9 +225,56 @@ operator_learning-nonlinear_diffusion/
      ```bash
      pip install -r requirements.txt
      ```
-### 输出结果：
 
-以下脚本为论文中的特定表格和图像结果：
+### 运行实验：
+
+1. 进入`src/`目录：
+   ```bash
+   cd src
+   ```
+
+2. 执行目标脚本，并指定GPU设备ID（例如：`0`、`1`）：
+   ```bash
+   bash <script_name>.sh device=<ID>
+   ```
+   示例：
+   ```bash
+   bash default_exps.sh device=0
+   ```
+
+3. 按需对其他脚本重复上述操作（如`default_exps.sh`，`nlayer_exps.sh`等）
+
+#### 使用`train.py`脚本：
+
+`train.py`用于训练和评估傅里叶神经算子模型（`FNO2d`、`FDON2d`、`FDON2d_II`），支持热扩散等任务。
+
+**核心功能**
+- **训练**：使用L2损失、Adam优化器和余弦退火学习率调度。支持`FNO2d`（输入：初值条件）和`FDON2d`/`FDON2d_II`（输入：初边值条件）。
+- **推理**：计算测试预测、相对L2损失和推理时间（GPU/CPU）。
+- **输出**：模型权重、预测结果、损失曲线和推理时间保存至`../result/<task>/<component>/`。
+
+**命令示例**
+```bash
+python train.py --task heat-1T-zsquares --arch fno --num-train 600 --num-test 100 --batch-size 4 --device 0
+```
+
+### 结果处理：
+
+完成所有实验后，对结果进行处理以生成最终表格和图表：
+
+1. 进入`result/`目录：
+   ```bash
+   cd result
+   ```
+
+2. 运行结果处理脚本：
+   ```bash
+   python result_process.py
+   ```
+
+该脚本会汇总实验输出数据，并生成与论文中表格和图表对应的结果。
+
+各脚本所对应的论文中的特定表格和图像结果如下表：
 
 | 脚本                  | 对应的结果                                |
 |-----------------------|-------------------------------------------|
@@ -243,44 +290,63 @@ operator_learning-nonlinear_diffusion/
 
 ### 精度及效率实验：
 
-使用如下命令行：
-
-```bash
-cd src
-bash default_exps.sh device=0
-```
-
 对于固定边值函数的任务， $\ell_2$ 相对误差如下：
 
-<img src="./result/figs/table2.png" alt="table2" width="700" />
+<img src="./result/figs/table2.png" alt="table2" width="300" />
 
 对于非固定边值函数的任务， $\ell_2$ 相对误差如下：
 
-<img src="./result/figs/table3.png" alt="table3" width="700" />
+<img src="./result/figs/table3.png" alt="table3" width="400" />
 
 全部算子学习任务的计算效率如下：
 
-<img src="./result/figs/table4.png" alt="table3" width="700" />
+<img src="./result/figs/table4.png" alt="table4" width="700" />
 
 默认设置下全部算子学习任务的训练动态如下：
 
-<img src="./result/figs/table3.png" alt="table3" width="700" />
+<img src="./result/figs/training_dynamics.jpg" alt="training_dynamics" width="700" />
 
-3. 按需重复运行其他脚本（如`nlayer_exps.sh`等）。
+以任务 $Z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ 为例，参考解、两类Fourier-DON以及绝对误差的可视化如下：
 
-#### 使用`train.py`脚本：
+<img src="./result/figs/ablation_study.jpg" alt="ablation_study" width="700" />
 
-`train.py`用于训练和评估傅里叶神经算子模型（`FNO2d`、`FDON2d`、`FDON2d_II`），支持热扩散等任务。
+### 消融实验：
 
-**核心功能**
-- **训练**：使用L2损失、Adam优化器和余弦退火学习率调度。支持`FNO2d`（输入：初值条件）和`FDON2d`/`FDON2d_II`（输入：初边值条件）。
-- **推理**：计算测试预测、相对L2损失和推理时间（GPU/CPU）。
-- **输出**：模型权重、预测结果、损失曲线和推理时间保存至`../result/<task>/<component>/`。
+以任务 $Z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ 为例，不同训练样本数量、Fourier层数、Fourier层通道数以及Fourier模数对精度的影响如下：
 
-**命令示例**
-```bash
-python train.py --task heat-1T-zsquares --arch fno --num-train 600 --num-test 100 --batch-size 4 --device 0
-```
+<img src="./result/figs/heat_2T_preds.jpg" alt="heat_2T_preds" width="700" />
+
+### 泛化能力实验：
+
+#### 超分辨率泛化：
+
+考虑任务 $Z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ ，不同训练数据分辨率对精度的影响如下：
+
+<img src="./result/figs/table5.png" alt="table5" width="700" />
+
+#### 时间泛化：
+
+考虑任务 $Z \times t_1 \times \beta_{\text{max}} \rightarrow E$ ，不同时刻 $\tau$ 下两类Fourier-DON的 $\ell_2$ 相对误差如下：
+
+<img src="./result/figs/table6.png" alt="table6" width="700" />
+
+不同时刻 $\tau$ 下参考解、两类Fourier-DON结果以及绝对误差可视化如下：
+
+<img src="./result/figs/heat_1T_seq_preds.jpg" alt="heat_1T_seq_preds" width="700" />
+
+## 故障排除：
+
+- **GPU错误**：验证GPU设备ID，并确保CUDA驱动程序与`requirements.txt`中的`torch`版本兼容
+- **依赖缺失**：若出现错误，请确保已安装`requirements.txt`中列出的所有依赖包，并参考论文检查额外要求
+- **结果不完整**：在处理结果前，确保所有实验均已成功运行。
+- **文件结构问题**：确认`dataset/`、`result/`和`requirements.txt`文件路径正确
+- **任务错误**: 仅使用`train.py`中列出的支持任务（如`heat-1T-zsquares`）
+
+## 补充说明：
+
+- `result_process.py`脚本默认所有实验均已成功完成
+- 实验详细说明及预期输出请参考论文
+- 进行大规模实验时，请监控系统资源以避免崩溃
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Operator Learning for Nonlinear Diffusion Problems

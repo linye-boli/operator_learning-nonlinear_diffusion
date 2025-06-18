@@ -314,7 +314,7 @@ python train.py --task heat-1T-zsquares --arch fno --num-train 600 --num-test 10
 
 以任务 $Z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ 为例，不同训练样本数量、Fourier层数、Fourier层通道数以及Fourier模数对精度的影响如下：
 
-<img src="./result/figs/heat_2T_preds.jpg" alt="heat_2T_preds" width="500" />
+<img src="./result/figs/heat_2T_preds.jpg" alt="heat_2T_preds" width="600" />
 
 ### 泛化能力实验：
 
@@ -350,6 +350,12 @@ python train.py --task heat-1T-zsquares --arch fno --num-train 600 --num-test 10
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Operator Learning for Nonlinear Diffusion Problems
+
+## Operator Learning Methods:  
+
+Fourier Neural Operator (FNO) and Deep Operator Network (DON) are representative approaches for learning differential operators, offering novel paradigms to address the challenge of cross-condition generalization in complex physical systems. FNO employs spectral-domain global convolutional kernels to capture long-range dependencies in multi-scale field evolution via Fourier transforms, while DON achieves efficient mapping in high-dimensional function spaces through implicit basis function decomposition and coefficient prediction. Existing operator learning methods have demonstrated advantages in linear and weakly nonlinear scenarios but still face challenges in multi-scale, strongly nonlinear problems.  
+
+This project introduces two Fourier-DON variant architectures that combine FNO and DON to learn the mapping from equation conditions to solutions of the radiative diffusion equation at specific time points: The first variant uses FNO to generate basis functions and employs a fully connected network for coefficient processing, while the second adopts element-wise feature combination followed by an FNO decoder. Compared to traditional numerical methods (e.g., finite element methods), Fourier-DON is faster, more accurate, and more generalizable, enabling efficient simulation in complex physical systems.
 
 This repository contains scripts to reproduce the results from the paper on operator learning for solving nonlinear diffusion problems. Follow the instructions below to set up the project, run experiments, and process results.
 

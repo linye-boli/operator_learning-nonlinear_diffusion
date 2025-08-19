@@ -6,7 +6,7 @@
 # and 257 for heat-2T* tasks (heat-2T-zsquares, heat-2T-zsquares-t1, heat-2T-zsquares-t1-bmax)
 
 # Configuration
-TASKS_FDON=("heat-1T-zsquares" "heat-1T-zsquares-t1" "heat-1T-zsquares-t1-bmax" "heat-2T-zsquares" "heat-2T-zsquares-t1" "heat-2T-zsquares-t1-bmax")
+TASKS_FDON=("heat-1T-zsquares-t1" "heat-1T-zsquares-t1-bmax" "heat-2T-zsquares-t1" "heat-2T-zsquares-t1-bmax")
 TASKS_FNO=("heat-1T-zsquares" "heat-2T-zsquares")
 ARCHS_FDON=("fdon1" "fdon2")
 ARCH_FNO="fno"

@@ -37,11 +37,11 @@ $$
 
 其中 $\Omega = [0,1]\times[0,1]$ ；辐射扩散系数 $D_L, K_L$ 同样选用限流形式，即 $D_L = \frac{1}{3\sigma_{\alpha}+\frac{|\nabla E|}{E}}, \sigma_{\alpha} = \frac{z^3}{E^{3/4}}, K_L = \frac{T^4}{T^{3/2}z+T^{5/2}|\nabla T|}$ 。
 
+### 算子学习任务：
+
 对于上述单温、双温问题，材料函数 $z$ 采用双方形，即在 $\Omega$ 内的两个0.25×0.25的方形区域中， $z=9$ ；其他时候 $z=1$ 。默认设置这两个方形区域左下角的坐标分别为 $(\frac{3}{16},\frac{9}{16}),(\frac{9}{16},\frac{3}{16})$ 。
 
 初值条件采用常数初值，即 $g(x,y,t) = 0.01$ ；边值条件采用线性边值，即当 $t<t_1$ 时， $\beta(x,y,t)=\frac{\beta_{\text{max}}}{t_1} t$ ；当 $t\leq t_1$ 时， $\beta(x,y,t)=\beta_{\text{max}}$ 。默认设置 $t_1=0.5,\beta_{\text{max}}=10$ 。
-
-### 算子学习任务：
 
 本项目需要研究的六个算子学习任务如下：
 
@@ -56,7 +56,7 @@ $$
 
 ## 算法设计：
 
-本项目的目标是构建一个神经网络替代模型，用于处理多输入算子 $𝒳_1\times 𝒳_2\rightarrow 𝒴$ ，其中 $𝒳_1$ 表示材料函数 $z$ 的函数空间， $𝒳_2$ 表示边值条件 $\beta$ 的函数空间，𝒴表示目标函数空间。为此，对原始DON进行修改，使其分支网络和主干网络能分别接受离散材料函数（表示为 $Z$ ）和离散边值函数（表示为 $\xi$ ），开发了两种变体：第一类Fourier-DON和第二类Fourier-DON。
+本项目的目标是构建一个神经网络替代模型，用于处理多输入算子 $𝒳_1\times 𝒳_2\rightarrow 𝒴$ ，其中 $𝒳_1$ 表示材料函数 $z$ 的函数空间， $𝒳_2$ 表示边值条件 $\beta$ 的函数空间，𝒴表示目标函数空间。
 
 针对边值条件固定的辐射扩散问题，我们直接采用FNO框架求解，在Fourier层之后增加了一个额外的线性层，直接将输出映射到解空间。而对于非固定边值条件的辐射扩散问题，本项目创新性地设计了两种端到端神经算子代理模型Fourier-DON。下面将以单温问题为例展开说明。对于双温问题，可构建两个并行网络分支分别学习辐射能量密度𝐄与材料温度𝐓。
 
@@ -201,7 +201,7 @@ operator_learning-nonlinear_diffusion/
 
 - SciencePlots==2.1.1
 
-### 设置：
+### 环境配置：
 
 1. **下载数据集以及结果**：
    - 从[https://pan.baidu.com/s/1CEs6UBiWCt3dzjk-vs98og?pwd=nrde](https://pan.baidu.com/s/1CEs6UBiWCt3dzjk-vs98og?pwd=nrde)访问数据集和结果
@@ -209,7 +209,7 @@ operator_learning-nonlinear_diffusion/
    - 根据上述项目结构，将提取的`dataset/`和`result/`文件夹放在根目录中
   
 2. **验证项目结构**：
-   - 确保项目目录与上述结构匹配，包括`requirements.txt`文件
+   - 确保项目目录与上述项目结构匹配，包括`requirements.txt`文件
 
 3. **安装依赖项**：
    - 创建虚拟环境（建议避免冲突）：
@@ -224,12 +224,14 @@ operator_learning-nonlinear_diffusion/
 
 ### 运行实验：
 
+#### 使用脚本（如`default_exps.sh`，`nlayer_exps.sh`等）：
+
 1. 进入`src/`目录：
    ```bash
    cd src
    ```
 
-2. 执行目标脚本，并指定GPU设备ID（例如：`0`、`1`）：
+2. 在多GPU设备上，可以指定具体的GPU设备来执行目标脚本：
    ```bash
    bash <script_name>.sh device=<ID>
    ```
@@ -238,18 +240,11 @@ operator_learning-nonlinear_diffusion/
    bash default_exps.sh device=0
    ```
 
-3. 按需对其他脚本重复上述操作（如`default_exps.sh`，`nlayer_exps.sh`等）
+3. 按需对其他脚本重复上述操作
 
 #### 使用`train.py`脚本：
 
-`train.py`用于训练和评估傅里叶神经算子模型（`FNO2d`、`FDON2d`、`FDON2d_II`），支持热扩散等任务。
-
-**核心功能**
-- **训练**：使用L2损失、Adam优化器和余弦退火学习率调度。支持`FNO2d`（输入：初值条件）和`FDON2d`/`FDON2d_II`（输入：初边值条件）。
-- **推理**：计算测试预测、相对L2损失和推理时间（GPU/CPU）。
-- **输出**：模型权重、预测结果、损失曲线和推理时间保存至`../result/<task>/<component>/`。
-
-**命令示例**
+命令示例：
 ```bash
 python train.py --task heat-1T-zsquares --arch fno --num-train 600 --num-test 100 --batch-size 4 --device 0
 ```
@@ -268,19 +263,13 @@ python train.py --task heat-1T-zsquares --arch fno --num-train 600 --num-test 10
    python result_process.py
    ```
 
-该脚本会汇总实验输出数据，并生成与论文中表格和图表对应的结果。
+### 故障排除：
 
-各脚本所对应的论文中的特定表格和图像结果如下表：
-
-| 脚本                  | 对应的结果                                |
-|-----------------------|-------------------------------------------|
-| `default_exps.sh`     | Table II, Table III, Table IV, Fig. 7, Fig. 8 |
-| `nlayer_exps.sh`      | Fig. 9                                   |
-| `ntrain_exps.sh`      | Fig. 9                                   |
-| `modes_exps.sh`       | Fig. 9                                   |
-| `width_exps.sh`       | Fig. 9                                   |
-| `superres_exps.sh`    | Table V                                  |
-| `seq_exps.sh`         | Fig. 10, Table VI                        |
+- **GPU错误**：验证GPU设备ID，并确保CUDA驱动程序与`requirements.txt`中的`torch`版本兼容
+- **依赖缺失**：若出现错误，请确保已安装`requirements.txt`中列出的所有依赖包，并参考论文检查额外要求
+- **结果不完整**：在处理结果前，确保所有实验均已成功运行。
+- **文件结构问题**：确认`dataset/`、`result/`和`requirements.txt`文件路径正确
+- **任务错误**: 仅使用`train.py`中列出的支持任务（如`heat-1T-zsquares`）
 
 ## 数值实验：
 
@@ -302,6 +291,12 @@ FNO、Type-1和Type-2 Fourier-DON均使用Adam优化器，利用小批量梯度�
 
 <img src="./result/figs/table3.png" alt="table3" width="400" />
 
+对于任务 $z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ ，两种Fourier-DON预测结果以及二者间绝对误差的可视化结果。
+
+<img src="./result/figs/heat_2T_preds.jpg" alt="table3" width="600" />
+
+### 模型效率测试实验：
+
 全部算子学习任务的计算效率如下：
 
 <img src="./result/figs/table4.png" alt="table4" width="700" />
@@ -310,390 +305,32 @@ FNO、Type-1和Type-2 Fourier-DON均使用Adam优化器，利用小批量梯度�
 
 <img src="./result/figs/training_dynamics.jpg" alt="training_dynamics" width="700" />
 
-以任务 $z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ 为例，参考解、两类Fourier-DON以及绝对误差的可视化如下：
-
-<img src="./result/figs/ablation_study.jpg" alt="ablation_study" width="700" />
-
-### 消融实验：
-
-以任务 $z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ 为例，不同训练样本数量、Fourier层数、Fourier层通道数以及Fourier模数对精度的影响如下：
-
-<img src="./result/figs/heat_2T_preds.jpg" alt="heat_2T_preds" width="600" />
-
-### 泛化能力实验：
-
-#### 超分辨率泛化：
-
-考虑任务 $z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ ，不同训练数据分辨率对精度的影响如下：
-
-<img src="./result/figs/table5.png" alt="table5" width="400" />
+### 模型泛化能力测试实验：
 
 #### 时间泛化：
 
-考虑任务 $z \times t_1 \times \beta_{\text{max}} \rightarrow E$ ，不同时刻 $\tau$ 下两类Fourier-DON的 $\ell_2$ 相对误差如下：
+考虑任务 $z \times t_1 \times \beta_{\text{max}} \rightarrow E$ ，不同时刻 $\tau$ 下两种Fourier-DON的相对 $L_2$ 误差如下：
 
 <img src="./result/figs/table6.png" alt="table6" width="700" />
 
-不同时刻 $\tau$ 下参考解、两类Fourier-DON结果以及绝对误差可视化如下：
+不同时刻 $\tau$ 下，两种Fourier-DON预测结果与参考解间绝对误差的可视化结果如下：
 
 <img src="./result/figs/heat_1T_seq_preds.jpg" alt="heat_1T_seq_preds" width="700" />
 
-## 故障排除：
+#### 训练数据分辨率泛化：
 
-- **GPU错误**：验证GPU设备ID，并确保CUDA驱动程序与`requirements.txt`中的`torch`版本兼容
-- **依赖缺失**：若出现错误，请确保已安装`requirements.txt`中列出的所有依赖包，并参考论文检查额外要求
-- **结果不完整**：在处理结果前，确保所有实验均已成功运行。
-- **文件结构问题**：确认`dataset/`、`result/`和`requirements.txt`文件路径正确
-- **任务错误**: 仅使用`train.py`中列出的支持任务（如`heat-1T-zsquares`）
+考虑任务 $z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ ，不同训练数据分辨率下，两种Fourier-DON的相对 $L_2$ 误差如下：
+
+<img src="./result/figs/table5.png" alt="table5" width="400" />
+
+### 模型超参数实验：
+
+以任务 $z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ 为例，不同训练样本数量、Fourier层数、Fourier层通道数以及Fourier模数对精度的影响如下：
+
+<img src="./result/figs/ablation_study.jpg" alt="ablation_study" width="700" />
 
 ## 补充说明：
 
 - `result_process.py`脚本默认所有实验均已成功完成
 - 实验详细说明及预期输出请参考论文
 - 进行大规模实验时，请监控系统资源以避免崩溃
-
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-# Operator Learning for Nonlinear Diffusion Problems
-
-## Operator Learning Methods:  
-
-Fourier Neural Operator (FNO) and Deep Operator Network (DON) are representative approaches for learning differential operators, offering novel paradigms to address the challenge of cross-condition generalization in complex physical systems. FNO employs spectral-domain global convolutional kernels to capture long-range dependencies in multi-scale field evolution via Fourier transforms, while DON achieves efficient mapping in high-dimensional function spaces through implicit basis function decomposition and coefficient prediction. Existing operator learning methods have demonstrated advantages in linear and weakly nonlinear scenarios but still face challenges in multi-scale, strongly nonlinear problems.  
-
-This project introduces two Fourier-DON variant architectures that combine FNO and DON to learn the mapping from equation conditions to solutions of the radiative diffusion equation at specific time points: The first variant uses FNO to generate basis functions and employs a fully connected network for coefficient processing, while the second adopts element-wise feature combination followed by an FNO decoder. Compared to traditional numerical methods (e.g., finite element methods), Fourier-DON is faster, more accurate, and more generalizable, enabling efficient simulation in complex physical systems.
-
-## Nonlinear Radiation Diffusion Problem:
-
-The nonlinear radiation diffusion problem represents a classic example of multiscale strongly coupled transport equations. At its core, it describes the nonlinear energy exchange process between radiation energy and material energy mediated by photon transport. The governing equations for this process can be expressed as follows.
-
-### Single-Temperature Problem:
-
-$$
-\begin{aligned}
-   & \frac{\partial E}{\partial t}-\nabla\cdot(D_L\nabla E) = 0, \quad(x,y,t)\in\Omega\times[0,1] \\
-   & 0.5E+D_L\nabla E\cdot n = \beta(x,y,t), \quad(x,y,t)\in\lbrace x=0\rbrace\times[0,1] \\
-   & 0.5E+D_L\nabla E\cdot n = 0, \quad(x,y,t)\in\partial\Omega\setminus\lbrace x=0\rbrace\times[0,1] \\
-   & E|_{t=0} = g(x,y,0)
-\end{aligned}
-$$
-
-where $\Omega = [0,1]\times[0,1]$ , while the radiation diffusion coefficient $D_L$ adopts the flux-limited form, expressed as $D_L = \frac{1}{3\sigma_{\alpha}+\frac{|\nabla E|}{E}}, \sigma_{\alpha} = \frac{z^3}{E^{3/4}}$ .
-
-### Two-Temperature Problem:
-
-$$
-\begin{aligned}
-   & \frac{\partial E}{\partial t} - \nabla \cdot (D_L \nabla E) = \sigma_{\alpha}(T^4 - E), \quad(x,y,t)\in\Omega\times[0,1] \\
-   & \frac{\partial T}{\partial t} - \nabla \cdot (K_L \nabla T) = \sigma_{\alpha}(E - T^4), \quad(x,y,t)\in\Omega\times[0,1] \\
-   & 0.5E + D_L \nabla E \cdot n = \beta(x,y,t), \quad (x,y,t) \in \lbrace x=0 \rbrace \times [0,1] \\
-   & 0.5E + D_L \nabla E \cdot n = 0, \quad (x,y,t) \in \partial\Omega \setminus \lbrace x=0 \rbrace \times [0,1] \\
-   & K_L \nabla T \cdot n = 0, \quad (x,y,t) \in \partial\Omega \times [0,1] \\
-   & E\vert_{t=0} = T^4\vert_{t=0} = g(x,y,0)
-\end{aligned}
-$$
-
-where $\Omega = [0,1]\times[0,1]$ , while the radiation diffusion coefficient $D_L, K_L$ also adopts the flux-limited form, expressed as $D_L = \frac{1}{3\sigma_{\alpha}+\frac{|\nabla E|}{E}}, \sigma_{\alpha} = \frac{z^3}{E^{3/4}}, K_L = \frac{T^4}{T^{3/2}z+T^{5/2}|\nabla T|}$ .
-
-For the single-temperature and two-temperature problems mentioned above, the material function $z$ adopts a double-square configuration, where $z=9$ within two 0.25×0.25 square regions in $\Omega$ , and $z=1$ elsewhere.
-
-The initial condition is set as a constant value: $g(x,y,t) = 0.01$ . The boundary condition follows a linear profile: when $t<t_1$ , $\beta(x,y,t)=\frac{\beta_{\text{max}}}{t_1} t$ ; when $t\leq t_1$ , $\beta(x,y,t)=\beta_{\text{max}}$ .
-
-### Operator Learning Tasks:
-
-The six operator learning tasks that need to be studied in this project are as follows:
-
-|                    | Tasks                          |
-|--------------------|--------------------------------|
-| single-temperature | $z \rightarrow E$              |
-|                    | $z \times t_1 \rightarrow E$   |
-|                    | $z \times t_1 \times \beta_{\text{max}} \rightarrow E$ |
-| two-temperature    | $z \rightarrow E, T$           |
-|                    | $z \times t_1 \rightarrow E, T$ |
-|                    | $z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ |
-
-## Design of Fourier-DON Algorithm:
-
-The goal of this project is to develop a neural network surrogate model for handling multi-input operators $𝒳_1\times 𝒳_2\times ... \times 𝒳_n\rightarrow 𝒴$ , where $𝒳_1\times 𝒳_2\times ... \times 𝒳_n$ represents $n$ distinct input function spaces, and 𝒴 denotes the output function space. To achieve this, we modify the original DON architecture such that its branch and trunk networks can separately process discrete material functions (denoted as $Z$) and discrete boundary value functions (denoted as $\xi$). Two variants are developed: Type-1 Fourier-DON and Type-2 Fourier-DON.
-
-The single-temperature task is used below to describe both variants. For the dual-temperature task, two Fourier-DON networks are employed to learn the target functions $𝐄,𝐓∈ℝ^{m\times m}$ , where $m$ represents the spatial dimension.
-
-### Type-1 Fourier-DON
-
-The architecture of Type-1 Fourier-DON is illustrated in the figure below, where the branch network is denoted as $B_\theta$ and the trunk network as $T_\theta$ .
-
-<img src="./result/figs/fno-deeponet-type1.jpg" alt="type1-model" width="300" />
-
-The material function 𝐙 is first scaled to the range (0,1) and concatenated with the corresponding 2D grid coordinates $X,Y∈ℝ^{m\times m}$ , forming $[z,X,Y]∈ℝ^{m\times m\times 3}$ as the input to the branch network. The boundary condition parameters $t_1∈ℝ$ and $\beta_{\text{max}}∈ℝ$ are also scaled to (0,1) and concatenated into  $[t_1,\beta_{\text{max}}]∈ℝ^2$ , serving as the input to the trunk network.
-
-The branch network begins with a linear layer that maps $ℝ^{m\times m\times 3}$ to $ℝ^{m\times m\times 32}$ , followed by four Fourier layers, each containing 12 modes and 32 channels. The pointwise transformation block within each layer is implemented as a two-layer fully connected network (FCN) with 32 hidden units per layer. The trunk network is configured as a four-layer FCN, each with 32 hidden units. The GeLU activation function is applied to all layers of both networks except the final layer.
-
-The outputs of the branch and trunk networks are:
-
-$$
-\begin{aligned}
-   & 𝐕 = B_\theta (𝐙)∈ℝ^{m\times m\times c}, \\
-   & 𝛚 = T_\theta (\xi)∈ℝ^c,
-\end{aligned}
-$$
-
-where $c$ is the number of channels. Here, 𝐕 can be viewed as a set of basis functions $[𝐕_1,...,𝐕_c]$ , and 𝛚 as a set of coefficients $[𝛚_1,...,𝛚_c]$ . For tasks with fixed boundary conditions, the trunk network can be omitted.
-
-The discretized target function $𝐄∈ℝ^{m\times m}$ is approximated as:
-
-$$
-\begin{equation}
-   𝐄̃ = \sum_i 𝛚_i 𝐕_i.
-\end{equation}
-$$
-
-The loss function is defined as the relative $\ell_2$ -norm error:
-
-$$
-\begin{equation}
-   L = \frac{1}{N} \sum_{k=1}^N \frac{‖𝐄^{(k)}-𝐄̃^{(k)}‖₂}{‖𝐄^{(k)}‖₂},
-\end{equation}
-$$
-
-where $N$ denotes the number of samples, $𝐄^{(k)}$ is the $k$ -th FEM reference solution, and $𝐄̃^{(k)}$ is the corresponding neural network prediction.
-
-Taking the task $z \times t_1 \times \beta_{\text{max}} \rightarrow E$ as an example, the detailed training process of Type-1 Fourier-DON is illustrated in the figure below:
-
-<img src="./result/figs/fno-deeponet-type1-train.jpg" alt="type1-train" width="700" />
-
-### Type-2 Fourier-DON
-
-The architecture of Type-2 Fourier-DON is illustrated in the figure below, with the decoder denoted as $\Phi_\theta$ .
-
-<img src="./result/figs/fno-deeponet-type2.jpg" alt="type2-model" width="400" />
-
-The input layers for both the branch network and trunk network remain identical to those in Type-1.
-
-Both the branch and trunk networks are implemented via a linear layer that maps $ℝ^{m\times m\times 3}$ to $ℝ^{m\times m\times 32}$ , followed by element-wise multiplication. The resulting output $𝐕∈ℝ^{m\times m\times 32}$ is fed into an FNO decoder, which consists of four Fourier layers (each identical to those in Type-1) and a two-layer FCN with 32 hidden units.
-
-The discretized target function $𝐄∈ℝ^{m\times m}$ is approximated as:
-
-$$
-\begin{aligned}
-   & 𝐁 = B_\theta (𝐙)∈ℝ^{m\times m\times c}, \\
-   & 𝐗 = T_\theta (\xi)∈ℝ^c, \\
-   & 𝐕_{i,j} = 𝐁_{i,j}⊙𝐗, \\
-   & 𝐄̃ = \Phi_\theta (𝐕^{(0)})
-\end{aligned}
-$$
-
-where $i,j∈[0,m-1]$ denote spatial indices of 𝐁 and 𝐕, and ⊙ represents element-wise multiplication. For tasks with fixed boundary conditions $\beta(x,y,t)$ , the trunk network can be omitted.
-
-The loss function is defined identically to that in Type-1.
-
-Taking the task $z \times t_1 \times \beta_{\text{max}} \rightarrow E$ as an example, the detailed training process of Type-2 Fourier-DON is illustrated in the figure below:
-
-<img src="./result/figs/fno-deeponet-type2-train.jpg" alt="type2-train" width="700" />
-
-## Code Introduction:
-
-For single-temperature problems, a 129×129 grid is used with a time step of 0.001. The Picard iteration continues until reaching a convergence threshold of 0.001 or completing 100 iterations, with FEM solutions serving as reference results. For two-temperature problems, a 257×257 grid is employed with a time step of 0.001, iterating until convergence to 0.01 or 100 iterations, again using FEM solutions as references.
-
-The input parameters include randomly sampled $z,t_1,\beta_{\text{max}}$ . The lower-left coordinates of parameter $z$ 's two square regions are sampled uniformly from (0,1), $t_1$ is sampled from [0,1], and $\beta_{\text{max}}$ is sampled from [9,11] to construct the source function $\beta(x,y,t)$ . For tasks using only $z$ as input, $t_1=0.5,\beta_{\text{max}}=10$ are fixed. For tasks with $z,t_1$ as inputs, $\beta_{\text{max}}=10$ is fixed.
-
-Both operator variants employ the Adam optimizer with mini-batch gradient descent. A cosine annealing scheduler is used with an initial learning rate of 0.001, trained for 100 epochs with a batch size of 4. The default configuration uses 600 training samples and 100 test samples.
-
-This repository contains scripts to reproduce the results from the paper on operator learning for solving nonlinear diffusion problems. Follow the instructions below to set up the project, run experiments, and process results.
-
-## Project Structure
-
-```
-operator_learning-nonlinear_diffusion/
-├── dataset/
-│   ├── nd/
-│   └── nd_seq/
-├── result/
-│   ├── exps/
-│   ├── seq_exps/
-│   ├── figs/
-│   └── result_process.py
-├── src/
-│   ├── train.py
-│   ├── nets.py
-│   ├── utils.sh
-│   ├── default_exps.sh
-│   ├── nlayer_exps.sh
-│   ├── ntrain_exps.sh
-│   ├── modes_exps.sh
-│   ├── width_exps.sh
-│   ├── superres_exps.sh
-│   └── seq_exps.sh
-├── requirements.txt
-└── README.md
-```
-
-### Parameter Specification:
-
-|Parameter      |Description      |Default      |
-|:--------:|:--------:|:--------:|
-|data-root    |Path to dataset directory ("../dataset/nd/" or "../dataset/nd_seq/")        |../dataset/nd/       |
-|task         |Task name (e.g., "heat-1T-zsquares", "heat-2T-zsquares-t1-bmax")    |heat-1T-zsquares     |
-|num-train   |Number of training samples                      |600          |
-|num-test    |Number of test samples                      |100          |
-|batch-size  |Batch size for training                      |4            |
-|seed        |Random seed for reproducibility            |0           |
-|lr          |Initial learning rate                        |1e-3         |
-|epochs      |Number of training epochs                        |100          |
-|modes       |Number of Fourier modes in x and y directions               |12           |
-|width       |Number of channels in the network                        |32           |
-|grid-size   |Spatial grid resolution                     |129          |
-|output-dir  |Directory to save training results                   |../result/   |
-|num-branch  |Number of branch layers (Fourier layers)              |4            |
-|num-trunk   |Number of trunk layers (linear layers for FDON2d)         |2            |
-|device      |GPU device ID                         |0            |
-|ratio       |Spatial sampling ratio (1, 2, or 4)              |1            |
-|arch        |Model architecture (fno, fdon1, fdon2)|fno          |
-
-### Prerequisites:
-
-- A system with a compatible GPU (ensure valid GPU device IDs are available).
-- Python (version compatible with dependencies, e.g., Python 3.8+) and Bash installed.
-- Required Python dependencies listed in `requirements.txt` (e.g., `torch`, `numpy`, `scipy`, `matplotlib`).
-- Ensure Pytorch installed with GPU support.
-- Access to the dataset and results (download link below).
-
-### Setup:
-
-1. **Download Dataset and Results**:
-   - Access the dataset and results at: [https://pan.baidu.com/s/1CEs6UBiWCt3dzjk-vs98og?pwd=nrde](https://pan.baidu.com/s/1CEs6UBiWCt3dzjk-vs98og?pwd=nrde).
-   - Unzip `dataset.zip` and `result.zip`.
-   - Place the extracted `dataset/` and `result/` folders in the root directory as shown in the project structure.
-
-2. **Verify Project Structure**:
-   - Ensure the project directory matches the structure above, including the `requirements.txt` file.
-
-3. **Install Dependencies**:
-   - Create a virtual environment (recommended to avoid conflicts):
-     ```bash
-     python -m venv env
-     source env/bin/activate  # On Windows: env\Scripts\activate
-     ```
-   - Install dependencies from `requirements.txt`:
-     ```bash
-     pip install -r requirements.txt
-     ```
-
-### Running Experiments:
-
-1. Navigate to the `src/` directory:
-   ```bash
-   cd src
-   ```
-
-2. Execute the desired script, specifying the GPU device ID (e.g., `0`, `1`):
-   ```bash
-   bash <script_name>.sh device=<ID>
-   ```
-   Example:
-   ```bash
-   bash default_exps.sh device=0
-   ```
-
-3. Repeat for each script as needed (`default_exps.sh`, `nlayer_exps.sh`, etc.).
-
-#### Using the `train.py` script:
-
-The `train.py` script trains and performs inference with Fourier Neural Operator models (`FNO2d`, `FDON2d`, `FDON2d_II`) for tasks like heat diffusion. 
-
-**Key Features**:
-- **Training**: Trains models using L2 loss, Adam optimizer, and cosine annealing learning rate scheduling. Supports `FNO2d` (input: initial conditions) and `FDON2d`/`FDON2d_II` (inputs: initial conditions and boundary conditions).
-- **Inference**: Computes test predictions, relative L2 loss, and inference times (GPU/CPU).
-- **Output**: Saves model weights, predictions, loss dynamics, and inference times to `../result/<task>/<component>/`.
-
-**Command Example**:
-```bash
-python train.py --task heat-1T-zsquares --arch fno --num-train 600 --num-test 100 --batch-size 4 --device 0
-```
-
-### Processing Results:
-
-After completing all experiments, process the results to generate the final tables and figures:
-
-1. Navigate to the `result/` directory:
-   ```bash
-   cd result
-   ```
-
-2. Run the result processing script:
-   ```bash
-   python result_process.py
-   ```
-
-This script aggregates experiment outputs and produces the results corresponding to the paper’s tables and figures.
-
-The following scripts generate results for specific tables and figures in the paper:
-
-| Script                | Generates Results For                     |
-|-----------------------|-------------------------------------------|
-| `default_exps.sh`     | Table II, Table III, Table IV, Fig. 7, Fig. 8 |
-| `nlayer_exps.sh`      | Fig. 9                                   |
-| `ntrain_exps.sh`      | Fig. 9                                   |
-| `modes_exps.sh`       | Fig. 9                                   |
-| `width_exps.sh`       | Fig. 9                                   |
-| `superres_exps.sh`    | Table V                                  |
-| `seq_exps.sh`         | Fig. 10, Table VI                        |
-
-## Numerical Experiments:
-
-### Accuracy and Efficiency Experiments:
-
-For tasks with fixed boundary value functions, the relative $\ell_2$ -norm errors are as follows:
-
-<img src="./result/figs/table2.png" alt="table2" width="400" />
-
-For tasks with non-fixed boundary value functions, the relative $\ell_2$ -norm errors are as follows:
-
-<img src="./result/figs/table3.png" alt="table3" width="400" />
-
-The computational efficiency for all operator learning tasks is as follows:
-
-<img src="./result/figs/table4.png" alt="table4" width="700" />
-
-The training dynamics of all operator learning tasks under default settings are as follows:
-
-<img src="./result/figs/training_dynamics.jpg" alt="training_dynamics" width="700" />
-
-Taking the task $z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ as an example, visualizations of reference solutions, two types of Fourier-DON results, and absolute errors are as follows:
-
-<img src="./result/figs/ablation_study.jpg" alt="ablation_study" width="700" />
-
-### Ablation Experiments:
-
-Taking the task $z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ the impact of different training sample sizes, number of Fourier layers, Fourier layer channels, and Fourier modes on accuracy is as follows:
-
-<img src="./result/figs/heat_2T_preds.jpg" alt="heat_2T_preds" width="600" />
-
-### Generalization Capabilities Experiments:
-
-#### Supperresolution performance:
-
-Considering the task $z \times t_1 \times \beta_{\text{max}} \rightarrow E, T$ the influence of different training data resolutions on accuracy is as follows:
-
-<img src="./result/figs/table5.png" alt="table5" width="400" />
-
-#### Temporal generalization:
-
-Considering the task $z \times t_1 \times \beta_{\text{max}} \rightarrow E$ the relative $\ell_2$ -norm errors of two Fourier-DON types at different time steps $\tau$ are as follows:
-
-<img src="./result/figs/table6.png" alt="table6" width="700" />
-
-Visualizations of reference solutions, two Fourier-DON results, and absolute errors at different time steps $\tau$ are as follows:
-
-<img src="./result/figs/heat_1T_seq_preds.jpg" alt="heat_1T_seq_preds" width="700" />
-
-## Troubleshooting:
-
-- **GPU Errors**: Verify the GPU device ID and ensure CUDA drivers are compatible with the `torch` version in `requirements.txt`.
-- **Missing Dependencies**: If errors occur, ensure all packages in `requirements.txt` are installed. Check the paper for additional requirements.
-- **Incomplete Results**: Ensure all experiments have run successfully before processing results.
-- **File Structure Issues**: Confirm `dataset/`, `result/`, and `requirements.txt` are correctly placed.
-- **Task Errors**: Use supported tasks (e.g., `heat-1T-zsquares`) as listed in `train.py`.
-
-## Additional Notes:
-
-- The `result_process.py` script assumes all experiments have completed successfully.
-- Refer to the paper for detailed experiment descriptions and expected outputs.
-- For large-scale experiments, monitor system resources to prevent crashes.

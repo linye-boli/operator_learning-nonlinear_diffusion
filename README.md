@@ -301,10 +301,6 @@ FNO、Type-1和Type-2 Fourier-DON均使用Adam优化器，利用小批量梯度�
 
 <img src="./result/figs/table4.png" alt="table4" width="700" />
 
-默认设置下全部算子学习任务的训练动态如下：
-
-<img src="./result/figs/training_dynamics.jpg" alt="training_dynamics" width="700" />
-
 ### 模型泛化能力测试实验：
 
 #### 时间泛化：

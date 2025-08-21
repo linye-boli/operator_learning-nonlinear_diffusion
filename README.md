@@ -95,7 +95,7 @@ $$
 
 <img src="./result/figs/fno-deeponet-type1-train.jpg" alt="type1-train" width="700" />
 
-### Type-2 Fourier-DON：
+### Type-2 Fourier-DON算法设计：
 
 Type-2 Fourier-DON的架构如下图所示，解码器表示为 $\Phi_\theta$ 。该算子也结合了FNO和DON的优势，采用编码器-解码器结构，通过全连接层分别将材料函数和边值条件参数投影到特征空间，将主干网络与分支网络的输出进行逐点内积后输入FNO解码器生成最终解。
 
@@ -166,7 +166,7 @@ operator_learning-nonlinear_diffusion/
 |modes       | $x$ 和 $y$ 方向的Fourier模数               |12           |
 |width       |网络通道数                        |32           |
 |grid-size   |空间网格分辨率                     |129          |
-|output-dir  |训练结果保存目录                   |`../result/`   |
+|output-dir  |训练结果保存目录                   |`../result`   |
 |num-branch  |分支层数（Fourier层）              |4            |
 |num-trunk   |主干层数（Type-1 Fourier-DON的线性层）         |2            |
 |device      |GPU设备ID                         |0            |
@@ -181,15 +181,15 @@ operator_learning-nonlinear_diffusion/
 
 **软件环境**：
 
-- Python 版本: Python 3.11.3
+- Python 版本: Python 3.12.7
 
 - Shell 环境: Bash
 
 **Python 依赖项**：
 
-- h5py==3.10.0
+- h5py==3.11.0
 
-- torch==2.3.1
+- torch==2.7.1
 
 - numpy==2.2.5
 
@@ -267,7 +267,7 @@ python train.py --task heat-1T-zsquares --arch fno --num-train 600 --num-test 10
 
 - **GPU错误**：验证GPU设备ID，并确保CUDA驱动程序与`requirements.txt`中的`torch`版本兼容
 - **依赖缺失**：若出现错误，请确保已安装`requirements.txt`中列出的所有依赖包，并参考论文检查额外要求
-- **结果不完整**：在处理结果前，确保所有实验均已成功运行。
+- **结果不完整**：在处理结果前，确保所有实验均已成功运行
 - **文件结构问题**：确认`dataset/`、`result/`和`requirements.txt`文件路径正确
 - **任务错误**: 仅使用`train.py`中列出的支持任务（如`heat-1T-zsquares`）
 
@@ -328,5 +328,5 @@ FNO、Type-1和Type-2 Fourier-DON均使用Adam优化器，利用小批量梯度�
 ## 补充说明：
 
 - `result_process.py`脚本默认所有实验均已成功完成
-- 实验详细说明及预期输出请参考论文
+- 实验详细说明及预期输出请参考论文及技术总结报告
 - 进行大规模实验时，请监控系统资源以避免崩溃
